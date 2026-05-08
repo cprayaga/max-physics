@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Max — Physics II Tutor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff;
+      --bg2: #f7f7f5;
+      --bg3: #f0efe9;
+      --text: #1a1a18;
+      --text2: #5a5a56;
+      --text3: #9a9a94;
+      --border: rgba(0,0,0,0.12);
+      --border2: rgba(0,0,0,0.22);
+      --purple: #3C3489;
+      --purple-light: #EEEDFE;
+      --purple-mid: #AFA9EC;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1a;
+        --bg2: #252523;
+        --bg3: #2e2e2b;
+        --text: #f0efe9;
+        --text2: #a8a89e;
+        --text3: #6a6a62;
+        --border: rgba(255,255,255,0.1);
+        --border2: rgba(255,255,255,0.2);
+        --purple: #7F77DD;
+        --purple-light: #26215C;
+        --purple-mid: #534AB7;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg3);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #app {
+      width: 100%;
+      max-width: 780px;
+      height: calc(100vh - 32px);
+      max-height: 860px;
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    /* ── LANDING ── */
+    #landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 20px;
+      padding: 32px 24px;
+    }
+    .landing-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+    }
+    .landing-title { text-align: center; }
+    .landing-title h1 { font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .landing-title p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+    .landing-title p.sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+    .landing-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11px; color: var(--text3); letter-spacing: 0.03em; }
+    .field input {
+      font-size: 13px; padding: 8px 11px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      background: var(--bg2); color: var(--text);
+      outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--purple); }
+    .voice-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 11px;
+      background: var(--bg2);
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      cursor: pointer;
+    }
+    .voice-row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--purple); cursor: pointer; }
+    .voice-row label { font-size: 12px; color: var(--text2); cursor: pointer; flex: 1; }
+    .landing-btns { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; }
+    .btn-primary {
+      padding: 10px; font-size: 13px; border-radius: var(--radius);
+      border: none; background: var(--purple); color: #EEEDFE;
+      cursor: pointer; font-weight: 500; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      padding: 10px; font-size: 13px; border-radius: var(--radius);
+      border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text);
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--bg3); }
+    #resume-list { width: 100%; max-width: 320px; display: none; }
+    #resume-list > p { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+    #saved-sessions { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+    .saved-card {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius); padding: 9px 12px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg2);
+    }
+    .saved-card-info { font-size: 11px; color: var(--text); }
+    .saved-card-info span { font-size: 10px; color: var(--text3); display: block; margin-top: 2px; }
+    .saved-card-btns { display: flex; gap: 5px; }
+    .saved-card-btns button { font-size: 10px; padding: 3px 9px; border-radius: 20px; border: 0.5px solid var(--border2); cursor: pointer; }
+    .btn-resume { background: var(--purple); color: #EEEDFE; border-color: var(--purple); }
+    .btn-delete { background: var(--bg); color: var(--text2); }
+    #no-sessions { font-size: 11px; color: var(--text3); display: none; padding: 8px 0; }
+
+    /* ── CHAT SCREEN ── */
+    #chat-screen { display: none; flex-direction: column; height: 100%; }
+
+    /* Header */
+    #header {
+      background: var(--bg2);
+      border-bottom: 0.5px solid var(--border);
+      padding: 9px 13px;
+      display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    }
+    #hav {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    #hinfo { flex: 1; min-width: 100px; }
+    #hinfo h2 { font-size: 13px; font-weight: 500; color: var(--text); }
+    #hinfo p { font-size: 10px; color: var(--text2); }
+    .hctl { display: flex; flex-direction: column; gap: 2px; }
+    .hctl label { font-size: 10px; color: var(--text3); }
+    .hctl select {
+      font-size: 11px; padding: 3px 7px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      background: var(--bg); color: var(--text);
+      width: 136px;
+    }
+    #badges { display: flex; flex-direction: column; gap: 3px; align-self: flex-end; }
+    .badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+    .badge-purple { background: var(--purple-light); color: var(--purple); border: 0.5px solid var(--purple-mid); }
+    .badge-blue { background: #E6F1FB; color: #185FA5; border: 0.5px solid #B5D4F4; }
+    #header-btns { display: flex; flex-direction: column; gap: 3px; align-self: flex-end; }
+    .hbtn {
+      font-size: 11px; padding: 4px 9px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      cursor: pointer; display: flex; align-items: center; gap: 4px;
+      white-space: nowrap; background: var(--bg); color: var(--text);
+      transition: background 0.15s;
+    }
+    .hbtn:hover:not(:disabled) { background: var(--bg2); }
+    .hbtn:disabled { color: var(--text3); cursor: not-allowed; }
+    #export-btn { background: var(--purple); color: #EEEDFE; border-color: var(--purple); }
+    #export-btn:hover:not(:disabled) { opacity: 0.88; }
+    #export-btn:disabled { background: var(--bg2); color: var(--text3); border-color: var(--border); }
+
+    /* Voice bar */
+    #voice-bar {
+      padding: 5px 13px;
+      background: #EAF3DE; border-bottom: 0.5px solid #C0DD97;
+      font-size: 11px; color: #3B6D11;
+      display: none; align-items: center; gap: 8px;
+    }
+    #voice-bar.show { display: flex; }
+    #voice-toggle {
+      margin-left: auto; font-size: 10px; padding: 2px 9px;
+      border-radius: 20px; border: 0.5px solid #C0DD97;
+      background: white; color: #3B6D11; cursor: pointer;
+    }
+
+    /* Chat */
+    #chat-area {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .msg { max-width: 88%; display: flex; flex-direction: column; gap: 3px; }
+    .msg.tutor { align-self: flex-start; }
+    .msg.student { align-self: flex-end; }
+    .msg-label {
+      font-size: 10px; color: var(--text3); padding: 0 3px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tutor .msg-label { align-self: flex-start; }
+    .student .msg-label { align-self: flex-end; }
+    .bubble { padding: 10px 14px; border-radius: 15px; font-size: 13.5px; line-height: 1.7; }
+    .tutor .bubble {
+      background: var(--bg2); color: var(--text);
+      border-bottom-left-radius: 4px;
+      border: 0.5px solid var(--border);
+    }
+    .student .bubble {
+      background: var(--purple); color: #EEEDFE;
+      border-bottom-right-radius: 4px;
+    }
+    .speak-btn {
+      background: none; border: 0.5px solid var(--border);
+      border-radius: 20px; padding: 1px 7px; font-size: 10px;
+      cursor: pointer; color: var(--text3);
+      display: flex; align-items: center; gap: 3px;
+      transition: background 0.15s;
+    }
+    .speak-btn:hover { background: var(--bg2); color: var(--text); }
+    .speak-btn.speaking { background: var(--purple-light); color: var(--purple); border-color: var(--purple-mid); }
+    .sys-msg {
+      align-self: center; font-size: 11px; color: var(--text3);
+      background: var(--bg2); border: 0.5px solid var(--border);
+      padding: 4px 13px; border-radius: 20px;
+    }
+    .typing { display: flex; align-items: center; gap: 5px; padding: 10px 14px; }
+    .typing span {
+      width: 7px; height: 7px; background: var(--text3);
+      border-radius: 50%; animation: bounce 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Input area */
+    #input-area { border-top: 0.5px solid var(--border); background: var(--bg2); }
+    #math-bar {
+      padding: 5px 10px; display: flex; align-items: center;
+      gap: 4px; border-bottom: 0.5px solid var(--border); overflow-x: auto;
+    }
+    #math-bar > span { font-size: 10px; color: var(--text3); white-space: nowrap; margin-right: 2px; }
+    .mb {
+      font-size: 12px; padding: 2px 7px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      background: var(--bg); color: var(--text);
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Courier New', monospace;
+      flex-shrink: 0; transition: background 0.1s;
+    }
+    .mb:hover { background: var(--bg3); }
+    #preview-bar { padding: 3px 13px; font-size: 11px; min-height: 24px; color: var(--text3); }
+    #input-row { display: flex; gap: 6px; padding: 8px 10px; align-items: flex-end; }
+    #user-input {
+      flex: 1; border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 7px 11px;
+      font-size: 13.5px; font-family: inherit;
+      resize: none; background: var(--bg); color: var(--text);
+      min-height: 36px; max-height: 100px; line-height: 1.5;
+      outline: none; transition: border-color 0.15s;
+    }
+    #user-input:focus { border-color: var(--purple); }
+    .icon-btn {
+      height: 36px; width: 36px; border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; font-size: 15px;
+      transition: background 0.15s;
+    }
+    #mic-btn { background: var(--bg); color: var(--text2); }
+    #mic-btn:hover { background: var(--bg2); }
+    #mic-btn.listening { background: #FFE8E8; color: #C0392B; border-color: #F5A9A0; animation: pulse 1s infinite; }
+    #send-btn { background: var(--purple); color: #EEEDFE; border-color: var(--purple); }
+    #send-btn:hover { opacity: 0.88; }
+    #send-btn:disabled { background: var(--bg2); color: var(--text3); border-color: var(--border); cursor: not-allowed; }
+
+    /* Overlays & modals */
+    .overlay {
+      position: absolute; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.48);
+      display: none; align-items: center; justify-content: center;
+      z-index: 100; border-radius: var(--radius-lg);
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--bg); border-radius: var(--radius-lg);
+      border: 0.5px solid var(--border2);
+      padding: 24px; width: 340px; max-width: 90vw;
+      display: flex; flex-direction: column; gap: 13px;
+      max-height: 88vh; overflow-y: auto;
+    }
+    .modal h3 { font-size: 15px; font-weight: 500; color: var(--text); }
+    .modal p { font-size: 12px; color: var(--text2); line-height: 1.65; }
+    .modal-detail {
+      background: var(--bg2); border-radius: var(--radius);
+      padding: 11px 13px; font-size: 11px;
+      color: var(--text2); line-height: 1.8;
+    }
+    .modal-detail strong { color: var(--text); }
+    .mbtns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+    .mbtns button {
+      font-size: 12px; padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2); cursor: pointer;
+    }
+    .mbtn-cancel { background: var(--bg2); color: var(--text); }
+    .mbtn-cancel:hover { background: var(--bg3); }
+    .mbtn-primary { background: var(--purple); color: #EEEDFE; border-color: var(--purple); }
+    .mbtn-primary:hover { opacity: 0.88; }
+    .mbtn-amber { background: #854F0B; color: #FAEEDA; border-color: #854F0B; }
+    .mbtn-amber:hover { opacity: 0.88; }
+    .modal-center { align-items: center; text-align: center; }
+    .modal-center .big-icon { font-size: 44px; margin-bottom: 4px; }
+
+    /* API key notice */
+    #apikey-notice {
+      background: #FAEEDA; border: 0.5px solid #FAC775;
+      border-radius: var(--radius); padding: 10px 13px;
+      font-size: 11px; color: #854F0B; line-height: 1.65;
+      display: none;
+    }
+    #apikey-notice.show { display: block; }
+    #apikey-notice a { color: #633806; font-weight: 500; }
+
+    /* KaTeX display fix */
+    .katex-display { overflow-x: auto; overflow-y: hidden; }
+    .katex { font-size: 1em !important; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ LANDING ══ -->
+  <div id="landing">
+    <div class="landing-avatar">🧑‍🔬</div>
+    <div class="landing-title">
+      <h1>Welcome to Max</h1>
+      <p>Physics II Socratic Tutor · Young &amp; Freedman 15e</p>
+      <p class="sub">Electricity &amp; Magnetism · Chapters 21–32</p>
+    </div>
+    <div class="landing-form">
+      <div class="field"><label>FULL NAME</label><input id="l-name" placeholder="e.g. Jane Smith" autocomplete="name"/></div>
+      <div class="field"><label>STUDENT ID</label><input id="l-id" placeholder="e.g. U12345678"/></div>
+      <div class="field"><label>COURSE SECTION</label><input id="l-section" placeholder="e.g. PHY 232 Section 01"/></div>
+      <div class="voice-row" onclick="document.getElementById('voice-pref').click()">
+        <input type="checkbox" id="voice-pref" checked onclick="event.stopPropagation()"/>
+        <label for="voice-pref">🔊 Enable Max's voice (text-to-speech) — Chrome recommended</label>
+      </div>
+    </div>
+    <div class="landing-btns">
+      <button class="btn-primary" onclick="startNew()">
+        <i class="ti ti-plus" aria-hidden="true"></i> Start new session
+      </button>
+      <button class="btn-secondary" onclick="showResume()">
+        <i class="ti ti-history" aria-hidden="true"></i> Resume a saved session
+      </button>
+    </div>
+    <div id="resume-list">
+      <p>Your saved sessions (this browser):</p>
+      <div id="saved-sessions"></div>
+      <p id="no-sessions">No saved sessions found. Enter your name and ID above then try again.</p>
+    </div>
+    <div id="apikey-notice">
+      <strong>⚠️ API key needed.</strong> Open <code>index.html</code> in a text editor and replace
+      <code>YOUR_API_KEY_HERE</code> with your Anthropic API key.
+      <a href="https://console.anthropic.com" target="_blank">Get one at console.anthropic.com →</a>
+    </div>
+  </div>
+
+  <!-- ══ CHAT SCREEN ══ -->
+  <div id="chat-screen">
+    <div id="header">
+      <div id="hav">🧑‍🔬</div>
+      <div id="hinfo">
+        <h2>Max — Physics II Tutor</h2>
+        <p id="student-label">Young &amp; Freedman 15e · Socratic mode</p>
+      </div>
+      <div class="hctl">
+        <label>CHAPTER</label>
+        <select id="chapter-select">
+          <option value="">Select chapter...</option>
+          <option value="21">Ch 21 — Electric Charge</option>
+          <option value="22">Ch 22 — Electric Field</option>
+          <option value="23">Ch 23 — Electric Potential</option>
+          <option value="24">Ch 24 — Capacitance</option>
+          <option value="25">Ch 25 — Current &amp; EMF</option>
+          <option value="26">Ch 26 — DC Circuits</option>
+          <option value="27">Ch 27 — Magnetic Forces</option>
+          <option value="28">Ch 28 — Magnetic Sources</option>
+          <option value="29">Ch 29 — Induction</option>
+          <option value="30">Ch 30 — Inductance</option>
+          <option value="31">Ch 31 — AC Circuits</option>
+          <option value="32">Ch 32 — EM Waves</option>
+        </select>
+      </div>
+      <div id="badges">
+        <span class="badge badge-purple" id="msg-badge"><i class="ti ti-message" aria-hidden="true"></i> 0 exchanges</span>
+        <span class="badge badge-blue" id="timer-badge"><i class="ti ti-clock" aria-hidden="true"></i> 00:00</span>
+      </div>
+      <div id="header-btns">
+        <button class="hbtn" id="pause-btn" onclick="openPauseModal()" disabled>
+          <i class="ti ti-device-floppy" aria-hidden="true"></i> Save &amp; Pause
+        </button>
+        <button class="hbtn" id="export-btn" onclick="openExportModal()" disabled>
+          <i class="ti ti-file-export" aria-hidden="true"></i> Finish &amp; Export
+        </button>
+      </div>
+    </div>
+
+    <div id="voice-bar">
+      🔊 Max's voice is <strong>&nbsp;on</strong> — click the speaker on any message to hear it.
+      <button id="voice-toggle" onclick="toggleVoice()">Turn off</button>
+    </div>
+
+    <div id="chat-area"></div>
+
+    <div id="input-area">
+      <div id="math-bar">
+        <span>Math:</span>
+        <button class="mb" onclick="ins('\\vec{E}')">Ē</button>
+        <button class="mb" onclick="ins('\\vec{B}')">B̄</button>
+        <button class="mb" onclick="ins('\\vec{F}')">F̄</button>
+        <button class="mb" onclick="ins('\\oint')">∮</button>
+        <button class="mb" onclick="ins('\\int')">∫</button>
+        <button class="mb" onclick="ins('\\frac{}{}')">a/b</button>
+        <button class="mb" onclick="ins('\\epsilon_0')">ε₀</button>
+        <button class="mb" onclick="ins('\\mu_0')">μ₀</button>
+        <button class="mb" onclick="ins('\\Phi_E')">Φ_E</button>
+        <button class="mb" onclick="ins('\\Phi_B')">Φ_B</button>
+        <button class="mb" onclick="ins('\\nabla \\cdot')">∇·</button>
+        <button class="mb" onclick="ins('\\nabla \\times')">∇×</button>
+        <button class="mb" onclick="ins('\\sqrt{}')">√</button>
+        <button class="mb" onclick="ins('^{2}')">x²</button>
+        <button class="mb" onclick="ins('\\pi')">π</button>
+        <button class="mb" onclick="ins('\\lambda')">λ</button>
+        <button class="mb" onclick="ins('\\omega')">ω</button>
+        <button class="mb" onclick="ins('\\theta')">θ</button>
+        <button class="mb" onclick="ins('\\alpha')">α</button>
+        <button class="mb" onclick="ins('\\infty')">∞</button>
+      </div>
+      <div id="preview-bar">math preview: type $…$ in your message</div>
+      <div id="input-row">
+        <textarea id="user-input"
+          placeholder="Ask Max anything… use $…$ for math, e.g. $\vec{F} = q\vec{E}$"
+          rows="1" aria-label="Message input"></textarea>
+        <button class="icon-btn" id="mic-btn" onclick="toggleMic()" title="Click to speak (Chrome)">
+          <i class="ti ti-microphone" aria-hidden="true"></i>
+        </button>
+        <button class="icon-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">
+          <i class="ti ti-send" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAUSE MODAL ══ -->
+  <div class="overlay" id="pause-overlay">
+    <div class="modal">
+      <h3><i class="ti ti-device-floppy" aria-hidden="true"></i> Save &amp; Pause session</h3>
+      <p>Your session will be saved to this browser. Resume anytime on the same device in Chrome.</p>
+      <div class="modal-detail" id="pause-summary"></div>
+      <p style="font-size:10px;color:var(--text3);">⚠️ Do not use Incognito mode — sessions are not saved there.</p>
+      <div class="mbtns">
+        <button class="mbtn-cancel" onclick="closePauseModal()">Cancel</button>
+        <button class="mbtn-amber" onclick="doPause()">
+          <i class="ti ti-device-floppy" aria-hidden="true"></i> Save &amp; Pause
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EXPORT MODAL ══ -->
+  <div class="overlay" id="export-overlay">
+    <div class="modal">
+      <h3><i class="ti ti-file-export" aria-hidden="true"></i> Finish &amp; Export session</h3>
+      <p>Downloads your complete session as a PDF for Canvas submission. This marks your session as complete.</p>
+      <div class="modal-detail" id="export-summary"></div>
+      <p style="font-size:10px;color:var(--text3);">
+        After downloading, upload to Canvas:<br>
+        <strong>Max Sessions → Ch [number] → [Your Name]</strong>
+      </p>
+      <div class="mbtns">
+        <button class="mbtn-cancel" onclick="closeExportModal()">Cancel</button>
+        <button class="mbtn-primary" onclick="doExport()">
+          <i class="ti ti-download" aria-hidden="true"></i> Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SAVED CONFIRMATION ══ -->
+  <div class="overlay" id="saved-overlay">
+    <div class="modal modal-center">
+      <div class="big-icon">💾</div>
+      <h3>Session saved!</h3>
+      <p>
+        Come back anytime. Open <strong>Chrome</strong>, go to the Max link,
+        enter your name and ID, and click <strong>Resume a saved session</strong>.
+      </p>
+      <p style="font-size:10px;color:var(--text3);">Same device · Same browser · No Incognito</p>
+      <div class="mbtns" style="justify-content:center;">
+        <button class="mbtn-primary" onclick="goToLanding()">Back to welcome screen</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURATION — replace with your API key
+// ══════════════════════════════════════════════
+const API_KEY = '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';
+
+const CHAPTERS = {
+  "21":"Chapter 21: Electric Charge and Coulomb's Law",
+  "22":"Chapter 22: Electric Field",
+  "23":"Chapter 23: Electric Potential",
+  "24":"Chapter 24: Capacitance and Dielectrics",
+  "25":"Chapter 25: Current, Resistance, and EMF",
+  "26":"Chapter 26: DC Circuits",
+  "27":"Chapter 27: Magnetic Field and Magnetic Forces",
+  "28":"Chapter 28: Sources of Magnetic Field",
+  "29":"Chapter 29: Electromagnetic Induction",
+  "30":"Chapter 30: Inductance",
+  "31":"Chapter 31: AC Circuits",
+  "32":"Chapter 32: Electromagnetic Waves"
+};
+
+const SYSTEM = `You are Max, a warm, witty, encouraging senior physics major serving as a Socratic tutor for undergraduate Physics II (Calculus-based Electricity and Magnetism). The course follows Young & Freedman "University Physics with Modern Physics" 15th edition, Chapters 21-32.
+
+PERSONA: You are a friendly, peer-like senior student who genuinely loves physics and wants to share that enthusiasm. You are slightly humorous, never condescending. Keep interactions light and occasionally make jokes, especially about your strict inability to just give away answers.
+
+CORE RULES:
+1. NEVER solve a homework or exam problem directly for the student, even if they beg or insist repeatedly. If pushed hard, joke: "Look, I would love to help more directly, but my lawyer has advised me that directly solving homework problems is a criminal offense. I am not going to jail for Gauss's Law, sorry." Then immediately redirect with a helpful guiding question.
+2. Use the Socratic method throughout: guide with questions, hints, and encouragement. Always ask what the student thinks before giving information.
+3. Encourage careful reading of the problem: ask them what the problem is specifically asking for, and what the known and unknown quantities are.
+4. Guide them to identify the relevant physical concept and the appropriate equation(s) — but make them identify these first, with your gentle guidance.
+5. If the student is missing prerequisite knowledge from an earlier chapter or from Physics I, gently ask if they recall it. If they do not, explain it briefly and clearly, then connect it to the current topic. Examples: "Remember the definition of Work from Physics I? Can you state it?" and if not, "No worries! Here it is: Work is defined as W = F·d·cos(θ). Now, how might that connect to what we are doing here?"
+6. Always reference Young & Freedman concepts, section names, and worked examples where relevant.
+7. If this is a resumed session (conversation history shows prior exchanges), acknowledge the return warmly: "Welcome back! Great to see you again. Let us pick up where we left off."
+
+MATH FORMATTING:
+- Always typeset mathematics using LaTeX delimiters.
+- Use $...$ for inline math and $$...$$ for displayed equations.
+- Always name equations when you introduce them and define every symbol. Example: "This is Gauss's Law: $$\\oint \\vec{E} \\cdot d\\vec{A} = \\frac{Q_{\\text{enc}}}{\\epsilon_0}$$ where $\\vec{E}$ is the electric field, $d\\vec{A}$ is the outward area element, and $Q_{\\text{enc}}$ is the total charge enclosed by the surface."
+
+TONE: Conversational, warm, and occasionally funny. Never dry, robotic, or textbook-like. You are talking to a real student who may be stressed, confused, and who needs encouragement just as much as physics help.`;
+
+// ── State ──
+let history = [], plainTranscript = [], selectedCh = "", loading = false;
+let exchangeCount = 0, totalMinutes = 0, sessionStart = null, timerInterval = null;
+let studentName = "", studentId = "", studentSection = "";
+let sessionKey = "", isResumed = false;
+let voiceEnabled = true, activeSpeakBtn = null;
+let recognition = null, isListening = false;
+
+// ── API key check ──
+document.addEventListener('DOMContentLoaded', () => {
+  if (API_KEY === 'YOUR_API_KEY_HERE') {
+    document.getElementById('apikey-notice').classList.add('show');
+  }
+  initMic();
+});
+
+// ── Math rendering ──
+function renderMath(text) {
+  return text
+    .replace(/\$\$([^$]+)\$\$/g, (_, t) => {
+      try { return katex.renderToString(t.trim(), {displayMode: true, throwOnError: false}); }
+      catch(e) { return `<code>${t}</code>`; }
+    })
+    .replace(/\$([^$\n]+)\$/g, (_, t) => {
+      try { return katex.renderToString(t.trim(), {displayMode: false, throwOnError: false}); }
+      catch(e) { return `<code>${t}</code>`; }
+    });
+}
+function renderBubble(text) {
+  let h = renderMath(text);
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+// ── Speech ──
+function latexToSpeech(text) {
+  return text
+    .replace(/\$\$([^$]+)\$\$/g, (_, t) => mathToWords(t))
+    .replace(/\$([^$\n]+)\$/g, (_, t) => mathToWords(t))
+    .replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+}
+function mathToWords(tex) {
+  return tex
+    .replace(/\\vec\{E\}/g,'E vector').replace(/\\vec\{B\}/g,'B vector')
+    .replace(/\\vec\{F\}/g,'F vector').replace(/\\vec\{v\}/g,'v vector')
+    .replace(/\\vec\{([^}]+)\}/g,'$1 vector')
+    .replace(/\\oint/g,'closed surface integral').replace(/\\int/g,'integral')
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g,'$1 over $2')
+    .replace(/\\epsilon_0/g,'epsilon naught').replace(/\\mu_0/g,'mu naught')
+    .replace(/\\Phi_E/g,'electric flux').replace(/\\Phi_B/g,'magnetic flux')
+    .replace(/\\nabla\s*\\cdot/g,'divergence of').replace(/\\nabla\s*\\times/g,'curl of')
+    .replace(/\\sqrt\{([^}]+)\}/g,'square root of $1')
+    .replace(/\^2/g,' squared').replace(/\^3/g,' cubed')
+    .replace(/\\pi/g,'pi').replace(/\\lambda/g,'lambda').replace(/\\omega/g,'omega')
+    .replace(/\\theta/g,'theta').replace(/\\alpha/g,'alpha').replace(/\\beta/g,'beta')
+    .replace(/\\infty/g,'infinity').replace(/\\cdot/g,'dot').replace(/\\times/g,'cross')
+    .replace(/Q_\{\\text\{enc\}\}/g,'Q enclosed')
+    .replace(/\{([^}]+)\}/g,'$1').replace(/[\\{}]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function speakText(text, btn) {
+  if (!voiceEnabled || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  if (activeSpeakBtn && activeSpeakBtn !== btn) {
+    activeSpeakBtn.innerHTML = '<i class="ti ti-volume" aria-hidden="true"></i>';
+    activeSpeakBtn.classList.remove('speaking');
+  }
+  if (btn.classList.contains('speaking')) {
+    btn.innerHTML = '<i class="ti ti-volume" aria-hidden="true"></i>';
+    btn.classList.remove('speaking'); activeSpeakBtn = null; return;
+  }
+  const utt = new SpeechSynthesisUtterance(latexToSpeech(text));
+  utt.rate = 0.91; utt.pitch = 1.05; utt.volume = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.name.includes('Google US English'))
+    || voices.find(v => v.lang === 'en-US') || voices[0];
+  if (preferred) utt.voice = preferred;
+  btn.innerHTML = '<i class="ti ti-player-stop" aria-hidden="true"></i>';
+  btn.classList.add('speaking'); activeSpeakBtn = btn;
+  utt.onend = utt.onerror = () => {
+    btn.innerHTML = '<i class="ti ti-volume" aria-hidden="true"></i>';
+    btn.classList.remove('speaking'); activeSpeakBtn = null;
+  };
+  window.speechSynthesis.speak(utt);
+}
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  window.speechSynthesis.cancel();
+  const bar = document.getElementById('voice-bar');
+  bar.innerHTML = voiceEnabled
+    ? '🔊 Max\'s voice is <strong>&nbsp;on</strong> — click the speaker on any message to hear it. <button id="voice-toggle" onclick="toggleVoice()">Turn off</button>'
+    : '🔇 Max\'s voice is <strong>&nbsp;off</strong>. <button id="voice-toggle" onclick="toggleVoice()">Turn on</button>';
+}
+
+// ── Mic (speech-to-text) ──
+function initMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.onresult = e => {
+    let final = '', interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    document.getElementById('user-input').value = final || interim;
+    updatePreview();
+  };
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+  };
+  recognition.onerror = () => {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+  };
+}
+function toggleMic() {
+  if (!recognition) { alert('Speech input requires Chrome. Please use Chrome for voice features.'); return; }
+  const btn = document.getElementById('mic-btn');
+  if (isListening) { recognition.stop(); isListening = false; btn.classList.remove('listening'); }
+  else { recognition.start(); isListening = true; btn.classList.add('listening'); }
+}
+
+// ── Timer ──
+function startTimer() {
+  if (timerInterval) return;
+  sessionStart = new Date();
+  timerInterval = setInterval(() => {
+    const secs = Math.floor((new Date() - sessionStart) / 1000);
+    const total = totalMinutes * 60 + secs;
+    const m = String(Math.floor(total / 60)).padStart(2, '0');
+    const s = String(total % 60).padStart(2, '0');
+    document.getElementById('timer-badge').innerHTML =
+      `<i class="ti ti-clock" aria-hidden="true"></i> ${m}:${s}`;
+  }, 1000);
+}
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (sessionStart) { totalMinutes += Math.floor((new Date() - sessionStart) / 60000); sessionStart = null; }
+}
+
+// ── Messages ──
+function addMsg(role, text, skipTranscript) {
+  const area = document.getElementById('chat-area');
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role === 'assistant' ? 'tutor' : 'student'}`;
+  const lbl = document.createElement('div');
+  lbl.className = 'msg-label';
+  if (role === 'assistant') {
+    lbl.innerHTML = 'Max';
+    if (voiceEnabled) {
+      const sb = document.createElement('button');
+      sb.className = 'speak-btn';
+      sb.innerHTML = '<i class="ti ti-volume" aria-hidden="true"></i>';
+      sb.title = 'Hear Max read this aloud';
+      sb.onclick = () => speakText(text, sb);
+      lbl.appendChild(sb);
+    }
+  } else { lbl.textContent = 'You'; }
+  const bub = document.createElement('div');
+  bub.className = 'bubble'; bub.innerHTML = renderBubble(text);
+  wrap.appendChild(lbl); wrap.appendChild(bub);
+  area.appendChild(wrap); area.scrollTop = area.scrollHeight;
+  if (!skipTranscript) plainTranscript.push({role: role === 'assistant' ? 'Max' : 'Student', text});
+
+  if (role === 'assistant' && voiceEnabled) {
+    const allBtns = document.querySelectorAll('.speak-btn');
+    const lastBtn = allBtns[allBtns.length - 1];
+    if (lastBtn) setTimeout(() => speakText(text, lastBtn), 400);
+  }
+}
+function addSysMsg(text) {
+  const area = document.getElementById('chat-area');
+  const d = document.createElement('div'); d.className = 'sys-msg'; d.textContent = text;
+  area.appendChild(d); area.scrollTop = area.scrollHeight;
+}
+function showTyping() {
+  const area = document.getElementById('chat-area');
+  const d = document.createElement('div'); d.className = 'msg tutor'; d.id = 'typing';
+  const l = document.createElement('div'); l.className = 'msg-label'; l.textContent = 'Max';
+  const b = document.createElement('div'); b.className = 'bubble typing';
+  b.innerHTML = '<span></span><span></span><span></span>';
+  d.appendChild(l); d.appendChild(b); area.appendChild(d); area.scrollTop = area.scrollHeight;
+}
+function hideTyping() { const e = document.getElementById('typing'); if (e) e.remove(); }
+
+// ── Landing ──
+function startNew() {
+  studentName = document.getElementById('l-name').value.trim();
+  studentId = document.getElementById('l-id').value.trim();
+  studentSection = document.getElementById('l-section').value.trim();
+  if (!studentName || !studentId) { alert('Please enter your name and student ID to continue.'); return; }
+  if (API_KEY === 'YOUR_API_KEY_HERE') { alert('The API key has not been configured yet. Please contact your instructor.'); return; }
+  voiceEnabled = document.getElementById('voice-pref').checked;
+  history = []; plainTranscript = []; exchangeCount = 0; totalMinutes = 0;
+  isResumed = false; sessionKey = '';
+  launchChat();
+  const firstName = studentName.split(' ')[0];
+  addMsg('assistant',
+    `Hey ${firstName}! I'm Max — your Physics II study buddy 😄\n\n` +
+    `Pick your chapter from the menu above, then tell me what's on your mind. ` +
+    `Fuzzy concept? Stuck on a problem? Whatever it is, I'm here. ` +
+    `Fair warning though: I will ask you questions back — that's the deal. No free answers, ` +
+    `but plenty of help getting there!\n\n` +
+    (voiceEnabled ? `🔊 My voice is on — you'll hear me read each response. Click the speaker icon to replay any message, or the mic button to speak your question.\n\n` : '') +
+    `Hit **Save & Pause** anytime to take a break and come back later. ` +
+    `Hit **Finish & Export** when you're all done to download your PDF for Canvas. Let's go!`,
+    true);
+}
+function launchChat() {
+  document.getElementById('landing').style.display = 'none';
+  const cs = document.getElementById('chat-screen'); cs.style.display = 'flex';
+  document.getElementById('student-label').textContent = `${studentName} · ${studentSection || 'Physics II'}`;
+  const vbar = document.getElementById('voice-bar');
+  if (voiceEnabled) vbar.classList.add('show'); else vbar.classList.remove('show');
+}
+function showResume() {
+  document.getElementById('resume-list').style.display = 'block';
+  const name = document.getElementById('l-name').value.trim();
+  const id = document.getElementById('l-id').value.trim();
+  const container = document.getElementById('saved-sessions');
+  const noMsg = document.getElementById('no-sessions');
+  container.innerHTML = '';
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('max_session:'));
+  const myKeys = name && id
+    ? keys.filter(k => k.startsWith(`max_session:${name.toLowerCase().replace(/\s+/g,'_')}:${id}:`))
+    : keys;
+  if (myKeys.length === 0) { noMsg.style.display = 'block'; return; }
+  noMsg.style.display = 'none';
+  myKeys.forEach(k => {
+    try {
+      const data = JSON.parse(localStorage.getItem(k));
+      const card = document.createElement('div'); card.className = 'saved-card';
+      card.innerHTML = `
+        <div class="saved-card-info">
+          ${data.chapterName || k}
+          <span>Saved: ${data.savedAt || '?'} · ${data.exchanges || 0} exchanges · ~${data.totalMinutes || 0} min</span>
+        </div>
+        <div class="saved-card-btns">
+          <button class="btn-resume" onclick="doResume('${k}')">Resume</button>
+          <button class="btn-delete" onclick="deleteSession('${k}', this)">Delete</button>
+        </div>`;
+      container.appendChild(card);
+    } catch(e) {}
+  });
+}
+function deleteSession(key, btn) { localStorage.removeItem(key); btn.closest('.saved-card').remove(); }
+function doResume(key) {
+  const raw = localStorage.getItem(key); if (!raw) { alert('Session not found.'); return; }
+  const data = JSON.parse(raw);
+  studentName = data.studentName || document.getElementById('l-name').value.trim();
+  studentId = data.studentId || document.getElementById('l-id').value.trim();
+  studentSection = data.studentSection || '';
+  history = data.history || []; plainTranscript = data.plainTranscript || [];
+  exchangeCount = data.exchanges || 0; totalMinutes = data.totalMinutes || 0;
+  selectedCh = data.chapter || ''; isResumed = true; sessionKey = key;
+  voiceEnabled = document.getElementById('voice-pref').checked;
+  launchChat();
+  if (selectedCh) document.getElementById('chapter-select').value = selectedCh;
+  const area = document.getElementById('chat-area'); area.innerHTML = '';
+  addSysMsg(`— Resumed · ${data.chapterName || 'Ch ' + selectedCh} · ${exchangeCount} exchanges · ~${totalMinutes} min so far —`);
+  plainTranscript.forEach(e => addMsg(e.role === 'Max' ? 'assistant' : 'user', e.text, true));
+  document.getElementById('msg-badge').innerHTML =
+    `<i class="ti ti-message" aria-hidden="true"></i> ${exchangeCount} exchange${exchangeCount !== 1 ? 's' : ''}`;
+  if (exchangeCount >= 1) {
+    document.getElementById('pause-btn').disabled = false;
+    document.getElementById('export-btn').disabled = false;
+  }
+  const r = `Welcome back, ${studentName.split(' ')[0]}! 👋 Great to see you again — we were working on ` +
+    `**${CHAPTERS[selectedCh] || 'Physics II'}**. Ready to pick up where we left off? What would you like to tackle next?`;
+  addMsg('assistant', r, false); history.push({role: 'assistant', content: r});
+}
+
+// ── Send message ──
+async function sendMessage() {
+  if (loading) return;
+  const inp = document.getElementById('user-input');
+  const text = inp.value.trim(); if (!text) return;
+  if (isListening) { recognition.stop(); isListening = false; document.getElementById('mic-btn').classList.remove('listening'); }
+  window.speechSynthesis.cancel();
+  addMsg('user', text);
+  history.push({role: 'user', content: text});
+  inp.value = ''; inp.style.height = 'auto';
+  document.getElementById('preview-bar').textContent = 'math preview: type $…$ in your message';
+  loading = true; document.getElementById('send-btn').disabled = true; showTyping(); startTimer();
+
+  const chCtx = selectedCh
+    ? `The student has selected: ${CHAPTERS[selectedCh]}. Focus your tutoring on this chapter, referencing earlier material as needed.`
+    : 'No chapter selected yet. Help with whatever Physics II topic the student raises (Chapters 21-32 of Young & Freedman 15e).';
+  const resumeCtx = isResumed ? '\nThis is a RESUMED session. Acknowledge the continuation naturally and warmly.' : '';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM + '\n\n' + chCtx + resumeCtx,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    hideTyping();
+    const reply = data.content?.[0]?.text || 'Something went wrong on my end — try again?';
+    history.push({role: 'assistant', content: reply});
+    addMsg('assistant', reply);
+    exchangeCount++; isResumed = false;
+    document.getElementById('msg-badge').innerHTML =
+      `<i class="ti ti-message" aria-hidden="true"></i> ${exchangeCount} exchange${exchangeCount !== 1 ? 's' : ''}`;
+    document.getElementById('pause-btn').disabled = false;
+    document.getElementById('export-btn').disabled = false;
+  } catch(e) {
+    hideTyping();
+    addMsg('assistant', 'Connection issue — please check your network and try again!');
+  }
+  loading = false; document.getElementById('send-btn').disabled = false;
+}
+
+// ── Math input ──
+function ins(latex) {
+  const inp = document.getElementById('user-input');
+  const s = inp.selectionStart, e = inp.selectionEnd;
+  inp.value = inp.value.substring(0, s) + '$' + latex + '$' + inp.value.substring(e);
+  inp.focus(); updatePreview();
+}
+function updatePreview() {
+  const text = document.getElementById('user-input').value;
+  const prev = document.getElementById('preview-bar');
+  const m = text.match(/\$[^$]+\$/g);
+  if (m) { try { prev.innerHTML = renderMath(m[m.length-1]); } catch(e) { prev.textContent = 'math preview…'; } }
+  else { prev.textContent = 'math preview: type $…$ in your message'; }
+}
+document.getElementById('user-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  updatePreview();
+});
+document.getElementById('user-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.getElementById('chapter-select').addEventListener('change', function() {
+  selectedCh = this.value;
+  if (selectedCh && history.length === 0) {
+    const r = `Great — we're diving into **${CHAPTERS[selectedCh]}**! ` +
+      `This is a really important chapter with some beautiful physics. ` +
+      `So what's on your mind — a concept you're fuzzy on, or a problem you're working through? ` +
+      `Tell me what you've got and importantly, what you've already tried!`;
+    addMsg('assistant', r, false); history.push({role: 'assistant', content: r});
+  }
+});
+
+// ── Pause / Export ──
+function makeKey(n, id, ch) { return `max_session:${n.toLowerCase().replace(/\s+/g,'_')}:${id}:ch${ch}`; }
+function openPauseModal() {
+  stopTimer();
+  document.getElementById('pause-summary').innerHTML =
+    `<strong>Student:</strong> ${studentName} (${studentId})<br>` +
+    `<strong>Chapter:</strong> ${selectedCh ? CHAPTERS[selectedCh] : 'General'}<br>` +
+    `<strong>Progress:</strong> ${exchangeCount} exchanges · ~${totalMinutes} min`;
+  document.getElementById('pause-overlay').classList.add('show');
+}
+function closePauseModal() { document.getElementById('pause-overlay').classList.remove('show'); startTimer(); }
+function doPause() {
+  const ch = selectedCh || 'general';
+  sessionKey = makeKey(studentName, studentId, ch);
+  localStorage.setItem(sessionKey, JSON.stringify({
+    studentName, studentId, studentSection,
+    chapter: selectedCh, chapterName: selectedCh ? CHAPTERS[selectedCh] : 'General Physics II',
+    history, plainTranscript, exchanges: exchangeCount, totalMinutes,
+    savedAt: new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  }));
+  document.getElementById('pause-overlay').classList.remove('show');
+  document.getElementById('saved-overlay').classList.add('show');
+}
+function goToLanding() {
+  document.getElementById('saved-overlay').classList.remove('show');
+  document.getElementById('chat-screen').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('resume-list').style.display = 'none';
+  history = []; plainTranscript = []; exchangeCount = 0; totalMinutes = 0;
+  selectedCh = ''; timerInterval = null; sessionStart = null;
+  document.getElementById('chat-area').innerHTML = '';
+  window.speechSynthesis.cancel();
+}
+function openExportModal() {
+  stopTimer();
+  document.getElementById('export-summary').innerHTML =
+    `<strong>Student:</strong> ${studentName} · ${studentId}<br>` +
+    `<strong>Section:</strong> ${studentSection || 'N/A'}<br>` +
+    `<strong>Chapter:</strong> ${selectedCh ? CHAPTERS[selectedCh] : 'General'}<br>` +
+    `<strong>Total:</strong> ${exchangeCount} exchanges · ~${totalMinutes} minutes`;
+  document.getElementById('export-overlay').classList.add('show');
+}
+function closeExportModal() { document.getElementById('export-overlay').classList.remove('show'); startTimer(); }
+
+function stripLatex(t) {
+  return t
+    .replace(/\$\$([^$]+)\$\$/g, (_, x) => `[${x.trim()}]`)
+    .replace(/\$([^$\n]+)\$/g, (_, x) => `[${x.trim()}]`)
+    .replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+}
+function doExport() {
+  const { jsPDF } = window.jspdf;
+  const chName = selectedCh ? CHAPTERS[selectedCh] : 'General Physics II';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const doc = new jsPDF({unit:'pt', format:'letter'});
+  const PW = 612, PH = 792, ML = 56, MR = 56, TW = PW - ML - MR;
+  let y = 56;
+  // Header
+  doc.setFillColor(60, 52, 137); doc.rect(0, 0, PW, 80, 'F');
+  doc.setTextColor(238, 237, 254);
+  doc.setFontSize(17); doc.setFont('helvetica', 'bold');
+  doc.text('Physics II — Max AI Tutoring Session', ML, 31);
+  doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
+  doc.text('University Physics with Modern Physics · Young & Freedman 15e', ML, 49);
+  doc.text('Socratic AI Tutor · Chapters 21–32', ML, 64);
+  y = 98;
+  // Details
+  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+  doc.text('Session Details', ML, y); y += 13;
+  doc.setDrawColor(200, 200, 220); doc.line(ML, y, PW - MR, y); y += 11;
+  [['Student', studentName], ['Student ID', studentId], ['Section', studentSection || 'N/A'],
+   ['Chapter', chName], ['Date', dateStr],
+   ['Duration', `~${totalMinutes} minute${totalMinutes !== 1 ? 's' : ''}`],
+   ['Exchanges', `${exchangeCount}`]
+  ].forEach(([k, v]) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.text(k + ':', ML, y);
+    doc.setFont('helvetica', 'normal'); doc.text(v, ML + 95, y); y += 15;
+  });
+  y += 8;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Session Transcript', ML, y); y += 13;
+  doc.setDrawColor(200, 200, 220); doc.line(ML, y, PW - MR, y); y += 13;
+  // Transcript
+  plainTranscript.forEach(entry => {
+    const isMax = entry.role === 'Max';
+    const lines = doc.splitTextToSize(stripLatex(entry.text), TW - 14);
+    const bh = lines.length * 11.5 + 22;
+    if (y + bh > PH - 56) { doc.addPage(); y = 56; }
+    doc.setFillColor(isMax ? 240 : 245, isMax ? 239 : 245, isMax ? 254 : 250);
+    doc.roundedRect(ML - 4, y - 10, TW + 8, bh, 4, 4, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
+    doc.setTextColor(isMax ? 60 : 80, isMax ? 52 : 80, isMax ? 137 : 100);
+    doc.text(entry.role, ML + 5, y); y += 3;
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30); doc.setFontSize(8.5);
+    lines.forEach(line => {
+      if (y + 13 > PH - 56) { doc.addPage(); y = 56; }
+      doc.text(line, ML + 9, y + 11); y += 11.5;
+    });
+    y += 17;
+  });
+  // Footer
+  if (y + 52 > PH - 30) { doc.addPage(); y = 56; }
+  doc.setDrawColor(200, 200, 220); doc.line(ML, y, PW - MR, y); y += 11;
+  doc.setFontSize(8); doc.setTextColor(150, 150, 150); doc.setFont('helvetica', 'italic');
+  doc.text('Max AI Tutor · Physics II · Young & Freedman 15e', ML, y); y += 10;
+  doc.text('Note: Math expressions appear as [expression] in this PDF. The live session showed fully rendered equations.', ML, y); y += 10;
+  doc.text(`Upload to Canvas: Max Sessions → Ch ${selectedCh || '__'} → ${studentName}`, ML, y);
+  doc.save(`Max_Session_Ch${selectedCh || 'XX'}_${studentName.replace(/\s+/g,'_')}_${now.toISOString().slice(0,10)}.pdf`);
+  if (sessionKey) localStorage.removeItem(sessionKey);
+  closeExportModal();
+}
+
+window.speechSynthesis && (window.speechSynthesis.onvoiceschanged = () => {});
+</script>
+</body>
+</html>
